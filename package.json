@@ -26,5 +26,8 @@
   "bugs": {
     "url": "https://github.com/kidGodzilla/meetingroom365-sdk/issues"
   },
-  "homepage": "https://github.com/kidGodzilla/meetingroom365-sdk#readme"
+  "homepage": "https://github.com/kidGodzilla/meetingroom365-sdk#readme",
+  "dependencies": {
+    "serve": "^14.2.1"
+  }
 }
