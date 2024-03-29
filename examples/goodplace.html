@@ -1,0 +1,207 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Good Place Meeting Room Display</title>
+    <style>
+    *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: Lato, sans-serif;
+        background: #2FCA74;
+        background: #0c9463;
+        background: #42b883;
+    }
+    body.warning { background: #f65c78; }
+
+    .main {
+        display: flex;
+        position: fixed;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+        /*   background: pink; */
+    }
+
+    h1 {
+        width: 100%;
+        font-size: 100px;
+        color: #fff;
+        text-align: center;
+        margin-top: -15px;
+    }
+
+    .overlay-menu {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        position: fixed;
+        background: #000;
+        align-items: center;
+        justify-content: center;
+        transition: .5s ease-in-out;
+        display: none;
+        opacity: 0;
+    }
+    .overlay-menu.open { opacity: 1; }
+    .overlay-menu a {
+        transition: 400ms ease;
+        transform: translateY(-140px);
+        text-decoration: none;
+        text-align: center;
+        line-height: 140px;
+        font-size: 72px;
+        cursor: pointer;
+        display: block;
+        color: #fff;
+        width: 100%;
+    }
+    .overlay-menu a:nth-of-type(2) { transition-delay: 0.02s; }
+    .overlay-menu a:nth-of-type(3) { transition-delay: 0.04s; }
+    .overlay-menu a:nth-of-type(4) { transition-delay: 0.06s; }
+    .overlay-menu.open a { transform: translateY(0); }
+    .overlay-menu a:hover { color: #42b883; }
+
+    .warning .overlay-menu a:hover { color: #fe346e; }
+
+    .on-warning { display: none !important; }
+    .warning .on-warning { display: block !important; }
+    .no-warning { display: block !important; }
+    .warning .no-warning { display: none !important; }
+
+    /* Animated Nav Icon */
+    .nav-icon {
+        transition: .5s ease-in-out;
+        transform: rotate(0deg);
+        position: fixed;
+        cursor: pointer;
+        height: 45px;
+        margin: 45px;
+        width: 60px;
+        right: 0;
+        top: 0;
+        z-index: 999;
+    }
+
+    .nav-icon span {
+        width: 50%;
+        opacity: 1;
+        height: 9px;
+        display: block;
+        position: absolute;
+        background: #fafafa;
+        transform: rotate(0deg);
+        transition: .25s ease-in-out;
+    }
+    .nav-icon.open:hover span { background: #42b883; }
+    .warning .nav-icon.open:hover span { background: #fe346e; }
+
+    .nav-icon span:nth-child(even) { left: 50%; border-radius: 0 9px 9px 0; }
+    .nav-icon span:nth-child(odd) { left: 0px; border-radius: 9px 0 0 9px; }
+    .nav-icon span:nth-child(1), .nav-icon span:nth-child(2) { top: 0px; }
+    .nav-icon span:nth-child(3), .nav-icon span:nth-child(4) { top: 18px; }
+    .nav-icon span:nth-child(5), .nav-icon span:nth-child(6) { top: 36px; }
+    .nav-icon.open span:nth-child(1),.nav-icon.open span:nth-child(6) { transform: rotate(45deg); }
+    .nav-icon.open span:nth-child(2), .nav-icon.open span:nth-child(5) { transform: rotate(-45deg); }
+    .nav-icon.open span:nth-child(1) { left: 5px; top: 7px; }
+    .nav-icon.open span:nth-child(2) { left: calc(50% - 5px); top: 7px; }
+    .nav-icon.open span:nth-child(3) { left: -50%; opacity: 0; }
+    .nav-icon.open span:nth-child(4) { left: 100%; opacity: 0; }
+    .nav-icon.open span:nth-child(5) { left: 5px; top: 29px; }
+    .nav-icon.open span:nth-child(6) { left: calc(50% - 5px); top: 29px; }
+</style>
+</head>
+<body>
+
+<div class="nav-icon">
+    <span></span><span></span>
+    <span></span><span></span>
+    <span></span><span></span>
+</div>
+<div class="main">
+    <h1>Everything is Fine</h1>
+</div>
+<div class="overlay-menu">
+    <div class="items">
+        <a class="no-warning" onclick="reserve()">Reserve Room</a>
+        <a class="on-warning" onclick="release()">End Meeting</a>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/ua-parser-js@latest"></script>
+
+<script src="../index.js"></script>
+
+<!--As a Module-->
+<script type="module">
+    window._debug = location.hostname === 'localhost'; // Enables debug output for development on Localhost
+
+    // Fetch our display configuration
+    let displayConfig = await Meetingroom365.init({
+        onUpdate: function(displayConfig) {
+            // Handle display configuration update from Admin portal
+            console.log('Display configuration updated in admin portal', displayConfig);
+        },
+    });
+
+    // Todo: handle the display configuration if you wish to apply any customizations to the app
+    console.log('configuration loaded', displayConfig);
+</script>
+<!--/ As a Module-->
+
+<!--Normal Script tag (with Callbacks)-->
+<script>
+    // Does the same thing, but is not a module, so is compatible with more devices and browsers
+    // Meetingroom365.init({}, function (config) {
+    //     console.log('configuration loaded', config);
+    // });
+</script>
+<!--/ Normal Script tag (with Callbacks)-->
+
+<script>
+    function reserve () {
+        $('h1').fadeOut();
+        setTimeout(function () {
+            $('body').addClass('warning');
+            $('h1').text('Occupied').fadeIn();
+
+            // Send the status update to Meeting Room 365
+            // To let it know the room is occupied
+            meetingroom365.updateStatus({ occupied: true });
+        }, 500);
+    }
+
+    function release () {
+        $('h1').fadeOut();
+        setTimeout(function () {
+            $('body').removeClass('warning');
+            $('h1').text('Everything is Fine').fadeIn();
+
+            // Send the status update to Meeting Room 365
+            // To let it know the room is available again
+            meetingroom365.updateStatus({ occupied: false });
+        }, 500);
+    }
+
+    var isFine = true;
+
+    $(document).ready(function () {
+        $('.nav-icon, .overlay-menu a').click(function () {
+            $('.overlay-menu').css('display', 'flex');
+
+            setTimeout(function () {
+                $('.nav-icon, .overlay-menu').toggleClass('open');
+            })
+        })
+    })
+</script>
+</body>
+</html>
