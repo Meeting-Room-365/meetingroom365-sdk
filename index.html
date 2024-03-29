@@ -3,21 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <title>Meeting Room 365 SDK</title>
+    <meta name="color-scheme" content="light dark" />
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.classless.min.css"/>
     <style>
         body {
             font-family: Inter, -apple-system, sans-serif;
-            padding: 60px;
+            /*padding: 60px;*/
+        }
+        .inline-block-light {
+            display: inline-block;
+        }
+        .inline-block-dark {
+            display: none;
+        }
+        @media (prefers-color-scheme: dark) {
+            .inline-block-light {
+                display: none;
+            }
+            .inline-block-dark {
+                display: inline-block;
+            }
         }
     </style>
 </head>
 <body>
 
-<h1>Examples</h1>
+<main>
+    <article>
+        <img src="https://www.meetingroom365.com/redesign/mr365-logo-2-tone3.svg" class="inline-block-light" style="height:32px" alt="Logo">
+        <img src="https://www.meetingroom365.com/redesign/logo-white2.svg" class="inline-block-dark" style="height:32px" alt="Logo">
+    </article>
 
-<p>Here are a list of examples you can use to understand the Meeting Room 365 SDK.</p>
+    <p>&nbsp;</p>
 
-<a href="examples/goodplace?key=goodplace">Good Place Dibs Room Example</a>
+    <article>
+        <h1>Meeting Room 365 SDK</h1>
+
+        <h3>For Javascript/Typescript</h3>
+    </article>
+
+    <p>&nbsp;</p>
+
+    <article>
+        <h2>Examples</h2>
+
+        <p>Here are a list of examples you can use to understand the Meeting Room 365 SDK.</p>
+
+        <ul>
+            <li>
+                <a href="examples/goodplace?key=goodplace">Good Place Dibs Room Example</a>
+            </li>
+        </ul>
+    </article>
+
+    <p>&nbsp;</p>
+
+    <article>
+        <h2>GitHub</h2>
+
+        <p>View the SDK on <a href="https://github.com/kidGodzilla/meetingroom365-sdk">GitHub</a></p>
+    </article>
+
+    <p>&nbsp;</p>
+</main>
 
 </body>
 </html>
