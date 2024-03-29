@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "serve ."
+    "start": "serve . -l 5000"
   },
   "repository": {
     "type": "git",
