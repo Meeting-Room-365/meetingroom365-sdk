@@ -1,0 +1,28 @@
+{
+  "name": "meetingroom365",
+  "version": "0.7.0",
+  "description": "An SDK for deploying a custom display on Meeting Room 365",
+  "types": "index.d.ts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kidGodzilla/meetingroom365-sdk.git"
+  },
+  "keywords": [
+    "digital",
+    "signage",
+    "kiosk",
+    "display",
+    "meetingroom365",
+    "sdk"
+  ],
+  "author": "James Futhey (https://www.meetingroom365.com/)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kidGodzilla/meetingroom365-sdk/issues"
+  },
+  "homepage": "https://github.com/kidGodzilla/meetingroom365-sdk#readme"
+}
