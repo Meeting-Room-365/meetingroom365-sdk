@@ -3,6 +3,10 @@ SDK for deploying a custom display on the Meeting Room 365 platform.
 
 With just a couple lines of code, you can create a custom app that will load a display configuration, managed in Meeting Room 365, and sync its status in real-time with the admin portal.
 
+# Examples
+
+You can view examples on [sdk.meetingroom365.com](https://sdk.meetingroom365.com)
+
 # Installation
 
 ### Inline (script tag)
