@@ -1,6 +1,6 @@
 {
   "name": "meetingroom365",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "An SDK for deploying a custom display on Meeting Room 365",
   "types": "index.d.ts",
   "main": "index.js",
@@ -27,5 +27,5 @@
   "bugs": {
     "url": "https://github.com/Meeting-Room-365/meetingroom365-sdk/issues"
   },
-  "homepage": "https://github.com/Meeting-Room-365/meetingroom365-sdk#readme"
+  "homepage": "https://sdk.meetingroom365.com/"
 }
