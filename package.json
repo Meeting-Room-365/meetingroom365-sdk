@@ -1,6 +1,6 @@
 {
   "name": "meetingroom365",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "An SDK for deploying a custom display on Meeting Room 365",
   "types": "index.d.ts",
   "main": "index.js",
