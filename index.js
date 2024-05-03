@@ -511,9 +511,13 @@ var ___mr365 = (function() {
             }
         },
         getConfiguration: async function(cb) {
+            if (!this.displayKey) return;
+
             let key = this.displayKey;
             if (key.indexOf('-')) key = key.split('-')[0];
+
             let displayConfig = await this.getDisplayConfigByKey(key);
+
             if (cb && typeof cb === 'function') cb(displayConfig);
             else return displayConfig;
         },
