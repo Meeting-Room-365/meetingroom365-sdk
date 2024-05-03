@@ -73,7 +73,7 @@ var ___mr365 = (function() {
      * Are we there yet?
      */
     var Awty = (function Awty () {
-        var _debug = 0, _polling = 1, _key, __interval, __timr, _defaultAction, __actions = {}, _server = 'https://hwm.meetingroom365.com';
+        var _debug = 0, _polling = 1, _key = null, __interval, __timr, _defaultAction, __actions = {}, _server = 'https://hwm.meetingroom365.com';
 
         if (window._debug) _debug = 1;
 
@@ -82,6 +82,7 @@ var ___mr365 = (function() {
         }
 
         function setKey (k) {
+            if (window._debug) console.log('ws setKey', k);
             _key = k;
         }
 
@@ -100,13 +101,16 @@ var ___mr365 = (function() {
         }
 
         async function _poll (newConf) {
-            if (typeof newConf == 'string') _key = newConf;
+            // if (window._debug) console.log('ws _poll newConf is:', JSON.stringify(newConf));
+            if (typeof newConf === 'string') _key = newConf;
             if (!newConf || typeof newConf != 'object') newConf = {};
             if (newConf.defaultAction) _defaultAction = newConf.defaultAction;
             if (newConf.server) _server = newConf.server;
             if (newConf.debug) _debug = newConf.debug;
             if (newConf.key) _key = newConf.key;
             var _st = new Date().getTime();
+
+            if (window._debug) console.log('ws _poll _key is:', _key, newConf);
 
             if (!_key) return console.warn('Cannot init without assigning a key.');
 
@@ -123,6 +127,7 @@ var ___mr365 = (function() {
                  */
                 if (!window.__wsErrorCount || window.__wsErrorCount < 10) {
                     var u = _server.replace('http', 'ws') + '/ws/' + _key;
+                    if (window._debug) console.log('ws key', _key);
                     if (window._debug) console.log('ws url', u);
                     window.__ws = new WebSocket(u);
 
@@ -355,11 +360,11 @@ var ___mr365 = (function() {
         },
         config: function (conf) {
             this.configuration = Object.assign(this.configuration, conf);
-            if (this.configuration.DEBUG) console.log('Meeting Room 365 Configuration (Meetingroom365.js):', this.configuration);
+            if (this.configuration.DEBUG || window._debug) console.log('Meeting Room 365 Configuration (Meetingroom365.js):', this.configuration);
         },
         init: async function (conf, cb) {
             this.configuration = Object.assign(this.configuration, conf);
-            if (this.configuration.DEBUG) console.log('Meeting Room 365 Configuration (Meetingroom365.js):', this.configuration);
+            if (this.configuration.DEBUG || window._debug) console.log('Meeting Room 365 Configuration (Meetingroom365.js):', this.configuration);
 
             let key = getSearchParam('key');
 
