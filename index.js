@@ -362,7 +362,10 @@ var ___mr365 = (function() {
 
             let key = getSearchParam('key');
 
-            this.displayKey = key;
+            if (key) this.displayKey = key;
+            if (this.configuration.key) this.displayKey = this.configuration.key;
+
+            if (!this.displayKey) return console.warn('Display key not found. A key must be passed explicitly to init({ key }) or implicitly via query parameter ?key=displayKey');
 
             if (this.configuration.LOCATION) this.getLocation();
 
