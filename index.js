@@ -12,7 +12,7 @@ if (typeof Object.assign !== 'function') {
         value: function assign(target, varArgs) {
             'use strict';
             if (target == null) {
-                throw new TypeError('Cannot convert undefined or null to object (Object.assign polyfill, Lilbird.js)');
+                throw new TypeError('Cannot convert undefined or null to object (Object.assign polyfill, Meeting Room 365 SDK)');
             }
 
             var to = Object(target);
