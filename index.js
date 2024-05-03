@@ -366,6 +366,7 @@ var ___mr365 = (function() {
             this.configuration = Object.assign(this.configuration, conf);
             if (this.configuration.DEBUG || window._debug) console.log('Meeting Room 365 Configuration (Meetingroom365.js):', this.configuration);
 
+            // Setup
             let key = getSearchParam('key');
 
             if (key) this.displayKey = key;
@@ -380,6 +381,7 @@ var ___mr365 = (function() {
                 setTimeout(() => this.updateStatus(), 10000);
             }
 
+            // Initialize WS
             this.initialize(() => {
                 awty.init({ key: this.displayKey, server: this._srvr }, () => {
                     if (window._debug) console.log('WS Initialized');
@@ -387,10 +389,14 @@ var ___mr365 = (function() {
                 window._awty = awty;
             });
 
+            this.initialized = true;
+
+            // Convenience callback to get displayConfig
             let displayConfig = await this.getDisplayConfigByKey(key);
             if (cb && typeof cb === 'function') cb(displayConfig);
             else return displayConfig;
         },
+        initialized: false,
         hardwareStatus: async function (cb) {
             // Battery status
             var battery;
