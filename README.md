@@ -51,6 +51,7 @@ Meetingroom365.init({ ...configuration }, callback<optional>)
 Meetingroom365.init({
     STATUS_UPDATE_INTERVAL: 15 * 60 * 1000, // Sends a status update every 15 minutes to let the admin portal know the display is online
     LOCATION: true, // Sends the device's IP and derrived location (from IP) to the admin portal
+    UPDATEDEVICESTATUS: true, // Update device status when updating display status
 
     key: 'manuallysetdisplaykey', // Production apps pass a display key automatically via query parameter
     
