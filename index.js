@@ -259,7 +259,7 @@ var ___mr365 = (function() {
     }
 
     function getSearchParam (key) {
-        var val = false;
+        var val;
         if (location.search.indexOf(key) !== -1) val = location.search.split(key + '=')[1];
         if (val && val.indexOf('&') !== -1) val = val.split('&')[0];
         return val;
@@ -369,10 +369,13 @@ var ___mr365 = (function() {
             // Setup
             let key = getSearchParam('key');
 
-            if (key) this.displayKey = key;
-            if (this.configuration.key && typeof this.configuration.key === 'string') this.displayKey = this.configuration.key;
+            if (key && key !== 'false' && key !== 'undefined') this.displayKey = key;
 
-            if (!this.displayKey) return console.warn('Display key not found. A key must be passed explicitly to init({ key }) or implicitly via query parameter ?key=displayKey');
+            if (this.configuration.key && typeof this.configuration.key === 'string' && this.configuration.key !== 'false' && this.configuration.key !== 'undefined') {
+                this.displayKey = this.configuration.key;
+            }
+
+            if (!this.displayKey || this.displayKey === 'false' || this.displayKey === 'undefined') return console.warn('Display key not found. A key must be passed explicitly to init({ key }) or implicitly via query parameter ?key=displayKey');
 
             if (this.configuration.LOCATION) this.getLocation();
 
@@ -494,6 +497,8 @@ var ___mr365 = (function() {
             if (cb && typeof cb === "function") cb();
         },
         getDisplayConfigByKey: async function (key, cb) {
+            if (!key || typeof key !== 'string' || key === 'undefined' || key === 'false') return;
+
             let r = await fetch(displayConfigByKeyUrl(key));
 
             if (r.ok) {
