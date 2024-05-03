@@ -447,6 +447,7 @@ var ___mr365 = (function() {
             let r = await fetch('https://api.meetingroom365.com/location');
             if (r.ok) {
                 let loc = await r.json();
+                if (loc.eu) loc.eu = parseInt(loc.eu);
                 this._loc = loc;
             }
         },
