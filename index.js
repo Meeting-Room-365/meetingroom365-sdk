@@ -328,8 +328,8 @@ var ___mr365 = (function() {
     var awty;
 
     var ___mr365 = {
-        _srvr: "https://hwm.mr365.co",
-        _APIURL: "https://states.mr365.co",
+        _srvr: "https://hwm.meetingroom365.com",
+        _APIURL: "https://states.meetingroom365.com",
         _basicDataSent: false,
         _loc: {},
         displayConfig: {
