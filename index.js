@@ -12,7 +12,7 @@ if (typeof Object.assign !== 'function') {
         value: function assign(target, varArgs) {
             'use strict';
             if (target == null) {
-                throw new TypeError('Cannot convert undefined or null to object (Object.assign polyfill, Meeting Room 365 SDK)');
+                throw new TypeError('Cannot convert undefined or null to object (Object.assign polyfill, Meetingroom365.js)');
             }
 
             var to = Object(target);
@@ -73,7 +73,7 @@ var ___mr365 = (function() {
      * Are we there yet?
      */
     var Awty = (function Awty () {
-        var _debug = 0, _polling = 1, _key, __interval, __timr, _defaultAction, __actions = {}, _server = 'https://hwm.mr365.co';
+        var _debug = 0, _polling = 1, _key, __interval, __timr, _defaultAction, __actions = {}, _server = 'https://hwm.meetingroom365.com';
 
         if (window._debug) _debug = 1;
 
@@ -123,6 +123,7 @@ var ___mr365 = (function() {
                  */
                 if (!window.__wsErrorCount || window.__wsErrorCount < 10) {
                     var u = _server.replace('http', 'ws') + '/ws/' + _key;
+                    if (window._debug) console.log('ws url', u);
                     window.__ws = new WebSocket(u);
 
                     window.__ws.onopen = function () {
@@ -363,7 +364,7 @@ var ___mr365 = (function() {
             let key = getSearchParam('key');
 
             if (key) this.displayKey = key;
-            if (this.configuration.key) this.displayKey = this.configuration.key;
+            if (this.configuration.key && typeof this.configuration.key === 'string') this.displayKey = this.configuration.key;
 
             if (!this.displayKey) return console.warn('Display key not found. A key must be passed explicitly to init({ key }) or implicitly via query parameter ?key=displayKey');
 
