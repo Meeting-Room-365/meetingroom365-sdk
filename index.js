@@ -484,13 +484,16 @@ var ___mr365 = (function() {
 
             // POST updated state
             if (!window.fetch || !this._APIURL) return;
-            let stateResult = await post(this._APIURL + '/displaystate', obj);
 
-            if (window._debug) console.log('Display status updated', obj);
-            this._basicDataSent = true;
+            if (this.configuration.STATUS_UPDATE_INTERVAL && obj && obj.key) {
+                let stateResult = await post(this._APIURL + '/displaystate', obj);
+
+                if (window._debug) console.log('Display status updated', obj);
+                this._basicDataSent = true;
+            }
 
             // POST updated state as status
-            if (this.configuration.UPDATEDEVICESTATUS) {
+            if (this.configuration.UPDATEDEVICESTATUS && obj && obj.email) {
                 let statusResult = await post(this._APIURL + '/displayStatus', obj);
             }
 
