@@ -355,6 +355,7 @@ var ___mr365 = (function() {
         configuration: {
             // Library configuration settings
             STATUS_UPDATE_INTERVAL: 15 * 60 * 1000,
+            UPDATEDEVICESTATUS: false,
             LOCATION: true,
             onUpdate: null,
         },
@@ -393,6 +394,24 @@ var ___mr365 = (function() {
             });
 
             this.initialized = true;
+
+            // Attempt to register postMessage listener
+            try {
+                window.addEventListener('message', function (event) {
+                    if (event.origin !== 'capacitor://localhost') return;
+
+                    let { action, content } = event.data;
+                    try { content = JSON.parse(event.data.content) } catch(e){}
+                    // console.log('Received message from parent:', action, content);
+                    if (action === 'deviceInfo') window.__deviceInfo = content;
+                }, false);
+
+                window.parent.postMessage(
+                    { action: 'register', content: `${ location.protocol }//${ location.host }` }, 'capacitor://localhost'
+                );
+            } catch(e){
+                console.log('Could not register postMessage listener');
+            }
 
             // Convenience callback to get displayConfig
             let displayConfig = await this.getDisplayConfigByKey(key);
@@ -488,13 +507,14 @@ var ___mr365 = (function() {
             if (this.configuration.STATUS_UPDATE_INTERVAL && obj && obj.key) {
                 let stateResult = await post(this._APIURL + '/displaystate', obj);
 
-                if (window._debug) console.log('Display status updated', obj);
+                if (window._debug) console.log('Display hardware status updated', obj);
                 this._basicDataSent = true;
             }
 
             // POST updated state as status
             if (this.configuration.UPDATEDEVICESTATUS && obj && obj.email) {
                 let statusResult = await post(this._APIURL + '/displayStatus', obj);
+                if (window._debug) console.log('Display status-state updated', obj);
             }
 
             if (cb && typeof cb === "function") cb();
