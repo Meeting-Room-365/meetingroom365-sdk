@@ -397,18 +397,20 @@ var ___mr365 = (function() {
 
             // Attempt to register postMessage listener
             try {
-                window.addEventListener('message', function (event) {
-                    if (event.origin !== 'capacitor://localhost') return;
+                if (location.protocol === 'https:') {
+                    window.addEventListener('message', function (event) {
+                        if (event.origin !== 'capacitor://localhost') return;
 
-                    let { action, content } = event.data;
-                    try { content = JSON.parse(event.data.content) } catch(e){}
-                    // console.log('Received message from parent:', action, content);
-                    if (action === 'deviceInfo') window.__deviceInfo = content;
-                }, false);
+                        let { action, content } = event.data;
+                        try { content = JSON.parse(event.data.content) } catch(e){}
+                        // console.log('Received message from parent:', action, content);
+                        if (action === 'deviceInfo') window.__deviceInfo = content;
+                    }, false);
 
-                window.parent.postMessage(
-                    { action: 'register', content: `${ location.protocol }//${ location.host }` }, 'capacitor://localhost'
-                );
+                    window.parent.postMessage(
+                        { action: 'register', content: `${ location.protocol }//${ location.host }` }, 'capacitor://localhost'
+                    );
+                }
             } catch(e){
                 console.log('Could not register postMessage listener');
             }
