@@ -1,0 +1,12 @@
+{
+  "domains": [
+    "sdk.meetingroom365.com"
+  ],
+  "scale": {
+    "web": 1
+  },
+  "resources": {
+    "cpu": "1",
+    "memory": "1024m"
+  }
+}
