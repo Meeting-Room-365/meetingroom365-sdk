@@ -265,9 +265,32 @@ var ___mr365 = (function() {
         return val;
     }
 
+    var _secret = '';
+
+    function setSecret(s) { _secret = s || ''; }
+
+    function returnBestSecret(displayKey) {
+        if (_secret) return _secret;
+        try {
+            var s = getSearchParam('secret');
+            if (s) return s;
+        } catch (e) {}
+        try {
+            if (displayKey) {
+                var v = localStorage.getItem('__secret_' + displayKey);
+                if (v) return v;
+            }
+            var g = localStorage.getItem('__secret');
+            if (g) return g;
+        } catch (e) {}
+        return '';
+    }
+
     function displayConfigByKeyUrl (key) {
-        const CONFBUCKETURL = 'https://userconf.meetingroom365.com';
-        return CONFBUCKETURL + '/key-' + key + '.json' + '?ts=' + Date.now();
+        var url = 'https://api.meetingroom365.com/api/display/config/' + key + '?ts=' + Date.now();
+        var secret = returnBestSecret(key);
+        if (secret) url += '&secret=' + encodeURIComponent(secret);
+        return url;
     }
 
     // Coerce a boolean or string version of a boolean to a boolean
@@ -596,6 +619,7 @@ var ___mr365 = (function() {
         },
         onRestart: function() {},
         onUpdate: function() {},
+        setSecret: function(s) { setSecret(s); },
         ready: domReady,
     }
 
