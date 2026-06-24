@@ -440,8 +440,90 @@ var ___mr365 = (function() {
 
             // Convenience callback to get displayConfig
             let displayConfig = await this.getDisplayConfigByKey(key);
+
+            // License validity check (renders hard lock or soft "Unlicensed" badge)
+            try { this.checkLicense() } catch(e){}
+
+            // Offline-notification heartbeat (legacy parity)
+            try { this.startOnlinePings() } catch(e){}
+
+            // Billable-online checkin (legacy parity: immediate + every 8h)
+            try { this.startDisplayIsOnlinePings() } catch(e){}
+
             if (cb && typeof cb === 'function') cb(displayConfig);
             else return displayConfig;
+        },
+        displayIsOnline: function () {
+            if (window.demo || window.isPreview || window.isConfiguring) return;
+            if (location.hostname.indexOf('localhost') > -1) return;
+            var dc = this.displayConfig || {};
+            var key = dc.originalKey || dc.key || this.displayKey;
+            if (!key || !this._APIURL) return;
+            try { fetch(this._APIURL + '/displayIsOnline/' + encodeURIComponent(key)) } catch(e){}
+        },
+        startDisplayIsOnlinePings: function () {
+            if (window.__mr365DisplayIsOnlineTimer) return;
+            var self = this;
+            self.displayIsOnline();
+            window.__mr365DisplayIsOnlineTimer = setInterval(function () { self.displayIsOnline() }, 8 * 60 * 60 * 1000);
+        },
+        offlineNotificationPing: function () {
+            var dc = this.displayConfig || {};
+            if (!dc.offlineNotificationEmail) return;
+            if (window.demo || window.isPreview || window.isConfiguring) return;
+            if (location.hash === '#demo') return;
+            if (location.hostname.indexOf('localhost') > -1) return;
+            var key = dc.originalKey || dc.key || this.displayKey;
+            if (!key) return;
+            try { fetch('https://online.meetingroom365.com/online/' + encodeURIComponent(key)) } catch(e){}
+        },
+        startOnlinePings: function () {
+            if (window.__mr365OnlinePingTimer) return;
+            var self = this;
+            setTimeout(function () { self.offlineNotificationPing() }, 20 * 1000);
+            window.__mr365OnlinePingTimer = setInterval(function () { self.offlineNotificationPing() }, 7 * 60 * 1000);
+        },
+        renderPaymentDue: function (isDue, isSoftWarning) {
+            try {
+                var prev = document.querySelector('.paymentdue');
+                if (prev && prev.parentNode) prev.parentNode.removeChild(prev);
+                var prevSoft = document.querySelector('.paymentdue-soft');
+                if (prevSoft && prevSoft.parentNode) prevSoft.parentNode.removeChild(prevSoft);
+            } catch(e){}
+
+            if (window.demo || window.isPreview || window.isConfiguring) return;
+
+            if (isDue) {
+                var h = document.createElement('h1');
+                h.className = 'paymentdue';
+                h.setAttribute('style', 'width: 90vw; text-align: center; z-index: 99999999999999999; position: fixed; top: 20vh; left: 5vw; right: 5vw; background: rgba(0,0,0,0.5); padding: 50px 30px; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif;');
+                h.textContent = 'There was an issue validating your display license (Payment Due). Please contact support.';
+                document.body.appendChild(h);
+                if (window.Analytics) window.Analytics.track('app__payment_due');
+            } else if (isSoftWarning) {
+                var d = document.createElement('div');
+                d.className = 'paymentdue-soft';
+                d.setAttribute('style', 'position: fixed; bottom: 8px; left: 10px; z-index: 99999999999999999; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: rgba(255,255,255,0.7); background: rgba(0,0,0,0.35); padding: 3px 8px; border-radius: 3px; pointer-events: none; letter-spacing: 0.5px;');
+                d.textContent = 'Unlicensed';
+                document.body.appendChild(d);
+                if (window.Analytics) window.Analytics.track('app__payment_soft_warning');
+            }
+        },
+        checkLicense: async function () {
+            // Server decides whether to surface a warning (incl. trial-period grace).
+            if (window.demo || window.isPreview || window.isConfiguring) return;
+            if (location.hostname.indexOf('localhost') > -1) return;
+
+            var dc = this.displayConfig || {};
+            var key = dc.originalKey || dc.key || this.displayKey;
+            if (!key) return;
+
+            try {
+                var url = 'https://licenses.meetingroom365.com/license?key=' + encodeURIComponent(key);
+                if (dc.tenant_lc) url += '&tenant=' + encodeURIComponent(dc.tenant_lc);
+                var data = await getJson(url);
+                if (data) this.renderPaymentDue(data.warning, data.softWarning);
+            } catch(e){}
         },
         initialized: false,
         hardwareStatus: async function (cb) {
@@ -717,3 +799,32 @@ var ___mr365 = (function() {
 if (typeof module !== 'undefined') {
     module.exports = ___mr365;
 }
+
+/**
+ * MR365 native shell heartbeat responder.
+ * The Capacitor kiosk wrapper periodically postMessages { action: 'ping', content: <nonce> }
+ * to detect a frozen / white-screened iframe (typically an iOS memory cleanup). We reply with
+ * a matching pong so the shell knows we're still rendering. Safe on any page; no-op when not
+ * embedded in the native shell.
+ */
+(function () {
+    try {
+        if (typeof window === 'undefined' || !window.addEventListener) return;
+        if (window.__mr365HeartbeatBound) return;
+        window.__mr365HeartbeatBound = true;
+        window.addEventListener('message', function (event) {
+            var data = event && event.data;
+            if (!data || data.action !== 'ping') return;
+            // Reply to whoever pinged us, echoing the nonce. event.source is the shell window;
+            // event.origin is its origin (capacitor://localhost on iOS).
+            var target = event.source || window.parent;
+            if (!target) return;
+            try {
+                target.postMessage(
+                    { action: 'pong', content: data.content },
+                    event.origin || '*'
+                );
+            } catch (e) {}
+        });
+    } catch (e) {}
+})();
