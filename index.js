@@ -629,6 +629,87 @@ var ___mr365 = (function() {
         }
     } catch(e){}
 
+    // ──────────────────────────────────────────────────────────────────────────
+    // Live config preview via postMessage.
+    //
+    // The MR365 admin's display-config editor embeds an SDK-themed display in an iframe with
+    // `?preview=1` and pipes pending edits in as the user types. The SDK mutates its
+    // `displayConfig` and broadcasts `mr365:config-changed` so themes can react. SDK-aware themes
+    // can also register a handler via `Meetingroom365.on('configchange', fn)`. Activates only
+    // when the URL carries a preview flag; origin-checked against an admin allow-list.
+    //
+    // Wire shape — same as v2/v3 (see meeting-room-365-app/public/app.common.js):
+    //   { type: 'mr365.config.patch',   patch:  {...} }
+    //   { type: 'mr365.config.replace', config: {...} }
+    //   { type: 'mr365.config.ping' }                       → reply 'mr365.config.pong'
+    try {
+        if (typeof window !== 'undefined' && window.addEventListener && window.location) {
+            var search = window.location.search || '';
+            var inPreview = search.indexOf('preview=1') !== -1
+                || search.indexOf('&preview=') !== -1;
+            if (inPreview) {
+                var ALLOWED = [
+                    'https://admin.meetingroom365.com',
+                    'https://admin-staging.meetingroom365.com',
+                    'https://next.meetingroom365.com',
+                    'http://localhost:5173',
+                    'http://localhost:8080',
+                    'http://localhost:3000',
+                    'http://127.0.0.1:5173',
+                ];
+                var originAllowed = function (origin) {
+                    if (!origin) return false;
+                    if (ALLOWED.indexOf(origin) !== -1) return true;
+                    return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+                };
+                var ack = function (id, source) {
+                    if (id == null || !source || typeof source.postMessage !== 'function') return;
+                    try { source.postMessage({ type: 'mr365.config.ack', id: id }, '*'); } catch (e) {}
+                };
+                var broadcast = function () {
+                    // Sync to window.displayConfig too so themes that read the global stay aligned.
+                    try { window.displayConfig = ___mr365.displayConfig; } catch (e) {}
+                    // Fire the SDK's onUpdate hook if a theme set one via Meetingroom365.config({ onUpdate }).
+                    try {
+                        if (typeof ___mr365.configuration.onUpdate === 'function') {
+                            ___mr365.configuration.onUpdate(___mr365.displayConfig);
+                        }
+                    } catch (e) {}
+                    // Broadcast a DOM event so themes that don't care about the SDK API can also react.
+                    try {
+                        window.dispatchEvent(new CustomEvent('mr365:config-changed', {
+                            detail: { config: ___mr365.displayConfig },
+                        }));
+                    } catch (e) {}
+                };
+                window.addEventListener('message', function (e) {
+                    if (!e || !e.data || typeof e.data !== 'object') return;
+                    if (!originAllowed(e.origin)) return;
+                    var data = e.data;
+                    if (data.type === 'mr365.config.ping') { ack(data.id, e.source); return; }
+                    if (data.type === 'mr365.config.patch' && data.patch && typeof data.patch === 'object') {
+                        ___mr365.displayConfig = Object.assign({}, ___mr365.displayConfig || {}, data.patch);
+                        broadcast();
+                        ack(data.id, e.source);
+                        return;
+                    }
+                    if (data.type === 'mr365.config.replace' && data.config && typeof data.config === 'object') {
+                        ___mr365.displayConfig = data.config;
+                        broadcast();
+                        ack(data.id, e.source);
+                        return;
+                    }
+                });
+                try {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'mr365.preview.ready' }, '*');
+                    }
+                } catch (e) {}
+            }
+        }
+    } catch (e) {}
+    // ──────────────────────────────────────────────────────────────────────────
+
     return ___mr365;
 
 })();
