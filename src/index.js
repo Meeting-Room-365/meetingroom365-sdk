@@ -286,6 +286,10 @@ var ___mr365 = (function() {
         return '';
     }
 
+    function normalizeDisplayKey (key) {
+        return String(key == null ? '' : key).toLowerCase().split(' ').join('');
+    }
+
     function displayConfigByKeyUrl (key) {
         var url = 'https://api.meetingroom365.com/api/display/config/' + key + '?ts=' + Date.now();
         var secret = returnBestSecret(key);
@@ -635,6 +639,13 @@ var ___mr365 = (function() {
 
             if (r.ok) {
                 let data = await r.json();
+
+                // Only accept the config for the key requested: originalKey, when present, must match
+                // (both lowercased, spaces removed; same rule as the server).
+                if (data && data.originalKey && normalizeDisplayKey(data.originalKey) !== normalizeDisplayKey(key)) {
+                    console.error('Display configuration rejected: requested ' + key + ', got ' + data.originalKey);
+                    return;
+                }
 
                 if (data) data = fixDisplayConfig(data);
 

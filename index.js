@@ -234,6 +234,9 @@ var ___mr365 = function() {
     }
     return "";
   }
+  function normalizeDisplayKey(key) {
+    return String(key == null ? "" : key).toLowerCase().split(" ").join("");
+  }
   function displayConfigByKeyUrl(key) {
     var url = "https://api.meetingroom365.com/api/display/config/" + key + "?ts=" + Date.now();
     var secret = returnBestSecret(key);
@@ -556,6 +559,10 @@ var ___mr365 = function() {
         let r = yield fetch(displayConfigByKeyUrl(key));
         if (r.ok) {
           let data = yield r.json();
+          if (data && data.originalKey && normalizeDisplayKey(data.originalKey) !== normalizeDisplayKey(key)) {
+            console.error("Display configuration rejected: requested " + key + ", got " + data.originalKey);
+            return;
+          }
           if (data) data = fixDisplayConfig(data);
           if (this.displayConfig && typeof displayConfig === "object") this.displayConfig = Object.assign(this.displayConfig, data);
           else this.displayConfig = data;
