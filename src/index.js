@@ -258,11 +258,14 @@ var ___mr365 = (function() {
         return result;
     }
 
+    // Exact name match (`key` must not match `apikey=` / `displayKey=`). Value stays raw.
     function getSearchParam (key) {
-        var val;
-        if (location.search.indexOf(key) !== -1) val = location.search.split(key + '=')[1];
-        if (val && val.indexOf('&') !== -1) val = val.split('&')[0];
-        return val;
+        var pairs = location.search.replace(/^\?/, '').split('&');
+        for (var i = 0; i < pairs.length; i++) {
+            var eq = pairs[i].indexOf('=');
+            if (eq !== -1 && pairs[i].slice(0, eq) === key) return pairs[i].slice(eq + 1);
+        }
+        return undefined;
     }
 
     var _secret = '';
@@ -277,7 +280,8 @@ var ___mr365 = (function() {
         } catch (e) {}
         try {
             if (displayKey) {
-                var v = localStorage.getItem('__secret_' + displayKey);
+                // Same slot device-lock writes: trimmed, lowercased, no whitespace.
+                var v = localStorage.getItem('__secret_' + String(displayKey).trim().toLowerCase().replace(/\s+/g, ''));
                 if (v) return v;
             }
             var g = localStorage.getItem('__secret');
@@ -460,8 +464,7 @@ var ___mr365 = (function() {
         displayIsOnline: function () {
             if (window.demo || window.isPreview || window.isConfiguring) return;
             if (location.hostname.indexOf('localhost') > -1) return;
-            var dc = this.displayConfig || {};
-            var key = dc.originalKey || dc.key || this.displayKey;
+            var key = this.displayKey;
             if (!key || !this._APIURL) return;
             try { fetch(this._APIURL + '/displayIsOnline/' + encodeURIComponent(key)) } catch(e){}
         },
@@ -477,7 +480,7 @@ var ___mr365 = (function() {
             if (window.demo || window.isPreview || window.isConfiguring) return;
             if (location.hash === '#demo') return;
             if (location.hostname.indexOf('localhost') > -1) return;
-            var key = dc.originalKey || dc.key || this.displayKey;
+            var key = this.displayKey;
             if (!key) return;
             try { fetch('https://online.meetingroom365.com/online/' + encodeURIComponent(key)) } catch(e){}
         },
@@ -519,7 +522,7 @@ var ___mr365 = (function() {
             if (location.hostname.indexOf('localhost') > -1) return;
 
             var dc = this.displayConfig || {};
-            var key = dc.originalKey || dc.key || this.displayKey;
+            var key = this.displayKey;
             if (!key) return;
 
             try {
@@ -596,7 +599,6 @@ var ___mr365 = (function() {
             if (!this.displayKey) return;
 
             let key = this.displayKey;
-            if (key.indexOf('-')) key = key.split('-')[0];
 
             try { obj = JSON.parse(obj) } catch (e) {}
             if (!obj || typeof obj !== 'object') obj = {};
@@ -662,7 +664,6 @@ var ___mr365 = (function() {
             if (!this.displayKey) return;
 
             let key = this.displayKey;
-            if (key.indexOf('-')) key = key.split('-')[0];
 
             let displayConfig = await this.getDisplayConfigByKey(key);
 
