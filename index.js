@@ -238,7 +238,7 @@ var ___mr365 = function() {
     return String(key == null ? "" : key).toLowerCase().split(" ").join("");
   }
   function displayConfigByKeyUrl(key) {
-    var url = "https://api.meetingroom365.com/api/display/config/" + key + "?ts=" + Date.now();
+    var url = "https://events.meetingroom365.com/api/display/config/" + key + "?ts=" + Date.now();
     var secret = returnBestSecret(key);
     if (secret) url += "&secret=" + encodeURIComponent(secret);
     return url;
@@ -509,7 +509,7 @@ var ___mr365 = function() {
     getLocation: function() {
       return __async(this, null, function* () {
         try {
-          let r = yield fetch("https://api.meetingroom365.com/location");
+          let r = yield fetch("https://events.meetingroom365.com/location");
           if (r.ok) {
             let loc = yield r.json();
             if (loc.eu) loc.eu = parseInt(loc.eu);
